@@ -1,16 +1,7 @@
-# sertific8
+# Sertific8
 
-A new Flutter project.
+Ini adalah project yang diperuntukkan untuk memenuhi tugas proyek akhir dari matakuliah Algoritma dan Pemrograman Semester 3.
 
-## Getting Started
+Aplikasi ini akan mengambil sebuah file gambar sertifikat, yang nantinya akan ditandai oleh user tempat untu mengisi nama-nama pada sertifikat tersebut.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Aplikasi ini direncakan akan rilis untuk Desktop (Windows, MacOS, dan Linux)
