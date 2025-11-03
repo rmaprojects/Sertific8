@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sertific8/states/pixel_selector_provider.dart';
-import 'package:sertific8/views/name_input_sheet.dart';
+import 'package:sertific8/views/name_input_sheet/name_input_sheet.dart';
 
 class PixelSelectorMenu extends StatelessWidget {
   final XFile imageFile;

@@ -45,6 +45,7 @@ class MyApp extends StatelessWidget {
       ),
       scrollBehavior: CupertinoScrollBehavior(),
       routerConfig: appRoute,
+      debugShowCheckedModeBanner: false,
       builder: (context, child) => Scaffold(
         appBar: const WindowBar(),
         body: child!,
