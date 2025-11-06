@@ -94,13 +94,12 @@ class ManualInputWidget extends StatelessWidget {
                     onPressed: () {
                       final names = provider.getNames();
                       if (names.isNotEmpty) {
-                        // Navigate to confirmation screen
                         Navigator.of(context, rootNavigator: true).pop();
 
                         confirmationProvider.setData(
                           names: names,
                           imagePath: pixelProvider.imageFile?.path ?? '',
-                          pixelPosition: pixelProvider.selectedPixel ?? Offset.zero,
+                          pixelPosition: pixelProvider.actualSelectedPixel ?? Offset.zero,
                         );
 
                         context.push('/confirmation');

@@ -226,7 +226,7 @@ class _CsvInputContent extends StatelessWidget {
                         confirmationProvider.setData(
                           names: names,
                           imagePath: pixelProvider.imageFile?.path ?? '',
-                          pixelPosition: pixelProvider.selectedPixel ?? Offset.zero,
+                          pixelPosition: pixelProvider.actualSelectedPixel ?? Offset.zero,
                         );
 
                         context.push('/confirmation');

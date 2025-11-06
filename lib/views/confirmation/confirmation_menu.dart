@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:sertific8/services/python_script_service.dart';
+import 'package:sertific8/services/cmd_script_service.dart';
 import 'package:sertific8/states/output_state.dart';
+import 'package:sertific8/states/results_provider.dart';
 
 class ConfirmationMenu extends StatelessWidget {
   const ConfirmationMenu({super.key});
@@ -53,8 +55,11 @@ class _ConfirmationContent extends StatelessWidget {
           ),
         );
 
-        // Navigate back to main menu
-        context.go('/');
+        // Set result paths and navigate to results screen
+        final resultsProvider = context.read<ResultsProvider>();
+        resultsProvider.setImagePaths(outputPaths);
+
+        context.push('/results');
       }
     } catch (e) {
       provider.setProcessing(false);
@@ -173,6 +178,17 @@ class _ConfirmationContent extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
+                    if (provider.imagePath != null)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(
+                          File(provider.imagePath!),
+                          fit: BoxFit.contain,
+                          height: 200,
+                          width: double.infinity,
+                        ),
+                      ),
+                    const SizedBox(height: 8),
                     Text(
                       provider.imagePath?.split('/').last ?? 'Unknown',
                       style: Theme.of(context).textTheme.bodyMedium,

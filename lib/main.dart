@@ -1,6 +1,7 @@
 import 'package:sertific8/components/window_bar.dart';
 import 'package:sertific8/routes/go_routes.dart';
 import 'package:sertific8/states/output_state.dart';
+import 'package:sertific8/states/results_provider.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -40,8 +41,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => GlobalOutputStateProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => GlobalOutputStateProvider()),
+        ChangeNotifierProvider(create: (_) => ResultsProvider()),
+      ],
       child: MaterialApp.router(
         title: 'Sertific8',
         theme: ThemeData(
