@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sertific8/states/output_state.dart';
 import 'package:sertific8/states/pixel_selector_provider.dart';
 import 'package:sertific8/views/name_input_sheet/name_input_sheet.dart';
 
@@ -88,6 +89,13 @@ class PixelSelectorMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<PixelSelectorProvider>(
       builder: (context, provider, child) {
+        // Set image file in provider when building
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (provider.imageFile == null) {
+            provider.setImageFile(imageFile);
+          }
+        });
+
         return Scaffold(
           body: Column(
             children: [
@@ -210,7 +218,8 @@ class PixelSelectorMenu extends StatelessWidget {
                               (provider.selectedPixel != null &&
                                  provider.isLocked)
                               ? () {
-                                  NameInputSheet.show(context);
+                                  final confirmationProvider = context.read<GlobalOutputStateProvider>();
+                                  NameInputSheet.show(context, pixelProvider: provider, confirmationProvider: confirmationProvider);
                                 }
                               : null,
                           child: const Text('Simpan Posisi'),

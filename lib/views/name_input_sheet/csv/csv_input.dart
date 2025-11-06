@@ -1,26 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sertific8/states/input_name_states.dart';
+import 'package:sertific8/states/pixel_selector_provider.dart';
+import 'package:sertific8/states/output_state.dart';
 
 // CSV input widget
 class CsvInputWidget extends StatelessWidget {
-  const CsvInputWidget({super.key});
+
+  final PixelSelectorProvider pixelProvider;
+  final GlobalOutputStateProvider confirmationProvider;
+
+  const CsvInputWidget({super.key, required this.pixelProvider, required this.confirmationProvider});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => CsvInputProvider(),
       child: Consumer<CsvInputProvider>(
-        builder: (context, provider, _) => _CsvInputContent(provider: provider),
+        builder: (context, provider, _) => _CsvInputContent(csvInputProvider: provider, pixelProvider: pixelProvider, confirmationProvider: confirmationProvider),
       ),
     );
   }
 }
 
 class _CsvInputContent extends StatelessWidget {
-  final CsvInputProvider provider;
+  final CsvInputProvider csvInputProvider;
+  final PixelSelectorProvider pixelProvider;
+  final GlobalOutputStateProvider confirmationProvider;
 
-  const _CsvInputContent({required this.provider});
+  const _CsvInputContent({required this.csvInputProvider, required this.pixelProvider, required this.confirmationProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +55,7 @@ class _CsvInputContent extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            if (provider.selectedFile == null)
+            if (csvInputProvider.selectedFile == null)
               Container(
                 padding: const EdgeInsets.all(32.0),
                 decoration: BoxDecoration(
@@ -102,7 +111,7 @@ class _CsvInputContent extends StatelessWidget {
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           Text(
-                            provider.selectedFile!.name,
+                            csvInputProvider.selectedFile!.name,
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -112,15 +121,15 @@ class _CsvInputContent extends StatelessWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: provider.clearFile,
+                      onPressed: csvInputProvider.clearFile,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              if (provider.isLoading)
+              if (csvInputProvider.isLoading)
                 const Center(child: CircularProgressIndicator())
-              else if (provider.csvData != null) ...[
+              else if (csvInputProvider.csvData != null) ...[
                 Text(
                   'Pilih kolom yang berisi nama:',
                   style: Theme.of(context).textTheme.titleMedium,
@@ -139,24 +148,29 @@ class _CsvInputContent extends StatelessWidget {
                       child: SingleChildScrollView(
                         child: DataTable(
                           columns: List.generate(
-                            provider.csvData![0].length,
+                            csvInputProvider.csvData![0].length,
                             (index) => DataColumn(
                               label: Column(
                                 children: [
                                   Text(
-                                    provider.csvData![0][index].toString(),
+                                    csvInputProvider.csvData![0][index].toString(),
                                     style: const TextStyle(fontWeight: FontWeight.bold),
                                   ),
-                                  Radio<int>(
-                                    value: index,
-                                    groupValue: provider.selectedColumnIndex,
-                                    onChanged: (value) => provider.setSelectedColumnIndex(value),
-                                  ),
+                                  RadioGroup<int>(
+                                    groupValue: csvInputProvider.selectedColumnIndex,
+                                    onChanged: (value) => csvInputProvider.setSelectedColumnIndex(value),
+                                    child: Radio<int>(value: index)
+                                  )
+                                  // Radio<int>(
+                                  //   value: index,
+                                  //   groupValue: provider.selectedColumnIndex,
+                                  //   onChanged: (value) => provider.setSelectedColumnIndex(value),
+                                  // ),
                                 ],
                               ),
                             ),
                           ),
-                          rows: provider.csvData!.skip(1).take(10).map((row) {
+                          rows: csvInputProvider.csvData!.skip(1).take(10).map((row) {
                             return DataRow(
                               cells: List.generate(
                                 row.length,
@@ -171,11 +185,11 @@ class _CsvInputContent extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (provider.csvData!.length > 11)
+                if (csvInputProvider.csvData!.length > 11)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
-                      'Menampilkan 10 dari ${provider.csvData!.length - 1} baris',
+                      'Menampilkan 10 dari ${csvInputProvider.csvData!.length - 1} baris',
                       style: Theme.of(context).textTheme.bodySmall,
                       textAlign: TextAlign.center,
                     ),
@@ -183,18 +197,18 @@ class _CsvInputContent extends StatelessWidget {
               ],
             ],
             const SizedBox(height: 16),
-            if (provider.selectedFile == null)
+            if (csvInputProvider.selectedFile == null)
               FilledButton.icon(
-                onPressed: () => provider.selectCsvFile(context),
+                onPressed: () => csvInputProvider.selectCsvFile(context),
                 icon: const Icon(Icons.folder_open),
                 label: const Text('Pilih File'),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.all(16),
                 ),
               )
-            else if (provider.csvData != null) ...[
+            else if (csvInputProvider.csvData != null) ...[
               OutlinedButton.icon(
-                onPressed: () => provider.selectCsvFile(context),
+                onPressed: () => csvInputProvider.selectCsvFile(context),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Ganti File'),
                 style: OutlinedButton.styleFrom(
@@ -203,22 +217,25 @@ class _CsvInputContent extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               FilledButton(
-                onPressed: provider.selectedColumnIndex != null
+                onPressed: csvInputProvider.selectedColumnIndex != null
                     ? () {
-                        final names = provider.getSelectedColumnData();
-                        // TODO: Process CSV column data
+                        final names = csvInputProvider.getSelectedColumnData();
+                        // Navigate to confirmation screen
                         Navigator.of(context, rootNavigator: true).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${names.length} nama diimpor dari CSV'),
-                          ),
+
+                        confirmationProvider.setData(
+                          names: names,
+                          imagePath: pixelProvider.imageFile?.path ?? '',
+                          pixelPosition: pixelProvider.selectedPixel ?? Offset.zero,
                         );
+
+                        context.push('/confirmation');
                       }
                     : null,
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.all(16),
                 ),
-                child: const Text('Proses Data'),
+                child: const Text('Lanjut ke Konfirmasi'),
               ),
             ],
           ],

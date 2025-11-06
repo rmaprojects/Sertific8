@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:sertific8/states/output_state.dart';
+import 'package:sertific8/states/pixel_selector_provider.dart';
 import 'package:sertific8/views/name_input_sheet/csv/csv_input.dart';
 import 'package:sertific8/views/name_input_sheet/manual/manual_form_input.dart';
 
 class NameInputSheet {
-  static void show(BuildContext context) {
+  static void show(BuildContext context, {required PixelSelectorProvider pixelProvider, required GlobalOutputStateProvider confirmationProvider}) {
     showModalBottomSheet(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
@@ -16,26 +18,30 @@ class NameInputSheet {
       constraints: BoxConstraints(
         maxWidth: MediaQuery.of(context).size.width,
       ),
-      builder: (context) => const _BottomSheetNavigator(),
+      builder: (context) => _BottomSheetNavigator(pixelProvider: pixelProvider, confirmationProvider: confirmationProvider),
     );
   }
 }
 
 // Nested Navigator for bottom sheet
 class _BottomSheetNavigator extends StatelessWidget {
-  const _BottomSheetNavigator();
+  final PixelSelectorProvider pixelProvider;
+  final GlobalOutputStateProvider confirmationProvider;
+
+  const _BottomSheetNavigator({required this.pixelProvider, required this.confirmationProvider});
 
   @override
   Widget build(BuildContext context) {
+
     return Navigator(
       onGenerateRoute: (settings) {
         return MaterialPageRoute(
           builder: (context) {
             switch (settings.name) {
               case '/manual':
-                return const ManualInputWidget();
+                return ManualInputWidget(pixelProvider: pixelProvider, confirmationProvider: confirmationProvider);
               case '/csv':
-                return const CsvInputWidget();
+                return CsvInputWidget(pixelProvider: pixelProvider, confirmationProvider: confirmationProvider);
               default:
                 return const _InputOptionsContent();
             }

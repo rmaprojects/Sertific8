@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sertific8/states/input_name_states.dart';
+import 'package:sertific8/states/pixel_selector_provider.dart';
+import 'package:sertific8/states/output_state.dart';
 
 // Manual input widget
 class ManualInputWidget extends StatelessWidget {
-  const ManualInputWidget({super.key});
+
+  final PixelSelectorProvider pixelProvider;
+  final GlobalOutputStateProvider confirmationProvider;
+
+  const ManualInputWidget({super.key, required this.pixelProvider, required this.confirmationProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -87,19 +94,22 @@ class ManualInputWidget extends StatelessWidget {
                     onPressed: () {
                       final names = provider.getNames();
                       if (names.isNotEmpty) {
-                        // TODO: Process manual name inputs
+                        // Navigate to confirmation screen
                         Navigator.of(context, rootNavigator: true).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${names.length} nama tersimpan'),
-                          ),
+
+                        confirmationProvider.setData(
+                          names: names,
+                          imagePath: pixelProvider.imageFile?.path ?? '',
+                          pixelPosition: pixelProvider.selectedPixel ?? Offset.zero,
                         );
+
+                        context.push('/confirmation');
                       }
                     },
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.all(16),
                     ),
-                    child: const Text('Simpan Semua'),
+                    child: const Text('Lanjut ke Konfirmasi'),
                   ),
                 ],
               ),

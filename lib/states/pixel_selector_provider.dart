@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:file_selector/file_selector.dart';
 
 class PixelSelectorProvider extends ChangeNotifier {
   Offset? _selectedPixel;
   Offset? _hoverPixel;
   bool _isLocked = false;
   Size? _imageSize;
+  XFile? _imageFile;
 
   Offset? get selectedPixel => _selectedPixel;
   Offset? get hoverPixel => _hoverPixel;
   bool get isLocked => _isLocked;
   Size? get imageSize => _imageSize;
+  XFile? get imageFile => _imageFile;
 
   void setImageSize(Size size) {
     _imageSize = size;
+    notifyListeners();
+  }
+
+  void setImageFile(XFile file) {
+    _imageFile = file;
     notifyListeners();
   }
 
@@ -46,6 +54,7 @@ class PixelSelectorProvider extends ChangeNotifier {
     _hoverPixel = null;
     _isLocked = false;
     _imageSize = null;
+    _imageFile = null;
     notifyListeners();
   }
 }
