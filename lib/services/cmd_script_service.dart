@@ -53,8 +53,8 @@ class CommandScriptService {
       final executablePath = await _ensureExecutableExists();
       final shell = Shell(runInShell:  true);
 
-
-      final namesStr = names.join(' ');
+      // Wrap each name with quotes to handle names with spaces
+      final namesStr = names.map((name) => '"$name"').join(' ');
       final command = '"$executablePath" '
           '--names $namesStr '
           '--image "$imagePath" '
