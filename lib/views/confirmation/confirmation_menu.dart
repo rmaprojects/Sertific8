@@ -12,7 +12,8 @@ class ConfirmationMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<GlobalOutputStateProvider>(
-      builder: (context, provider, _) => _ConfirmationContent(provider: provider),
+      builder: (context, provider, _) =>
+          _ConfirmationContent(provider: provider),
     );
   }
 }
@@ -22,7 +23,7 @@ class _ConfirmationContent extends StatelessWidget {
 
   const _ConfirmationContent({required this.provider});
 
-  Future<void> _processConfirmation(BuildContext context) async {
+  Future<void> _executeGenerateSertificate(BuildContext context) async {
     if (provider.outputDirectory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -48,9 +49,7 @@ class _ConfirmationContent extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Berhasil membuat ${outputPaths.length} sertifikat!',
-            ),
+            content: Text('Berhasil membuat ${outputPaths.length} sertifikat!'),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -78,9 +77,7 @@ class _ConfirmationContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Konfirmasi Data'),
-      ),
+      appBar: AppBar(title: const Text('Konfirmasi Data')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -102,9 +99,8 @@ class _ConfirmationContent extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Daftar Nama',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -112,7 +108,9 @@ class _ConfirmationContent extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       constraints: const BoxConstraints(maxHeight: 200),
@@ -125,9 +123,8 @@ class _ConfirmationContent extends StatelessWidget {
                             children: [
                               Text(
                                 '${index + 1}.',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
@@ -145,9 +142,9 @@ class _ConfirmationContent extends StatelessWidget {
                     Text(
                       'Total: ${provider.names.length} nama',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -171,9 +168,8 @@ class _ConfirmationContent extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Template Sertifikat',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -216,9 +212,8 @@ class _ConfirmationContent extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Posisi Teks',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -249,9 +244,8 @@ class _ConfirmationContent extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Folder Output',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -260,8 +254,8 @@ class _ConfirmationContent extends StatelessWidget {
                       Text(
                         'Belum dipilih',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.error,
-                            ),
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       )
                     else
                       Row(
@@ -307,10 +301,44 @@ class _ConfirmationContent extends StatelessWidget {
             FilledButton(
               onPressed: provider.isProcessing
                   ? null
-                  : () => _processConfirmation(context),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.all(20),
-              ),
+                  : () async {
+                      final controller = showBottomSheet(
+                        context: context,
+                        enableDrag: false,
+                        showDragHandle: false,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                        builder: (context) => PopScope(
+                          canPop: false,
+                          child: SizedBox(
+                            height: double.infinity,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Memproses sertifikat, mohon tunggu...',
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+
+                      await _executeGenerateSertificate(context);
+
+                      if (context.mounted) {
+                        controller.close();
+                      }
+                    },
+              style: FilledButton.styleFrom(padding: const EdgeInsets.all(20)),
               child: provider.isProcessing
                   ? const SizedBox(
                       height: 20,
