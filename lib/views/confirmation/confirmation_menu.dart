@@ -302,30 +302,35 @@ class _ConfirmationContent extends StatelessWidget {
               onPressed: provider.isProcessing
                   ? null
                   : () async {
-                      final controller = showBottomSheet(
+                      // Show modal bottom sheet with loading
+                      showModalBottomSheet(
                         context: context,
+                        isDismissible: false,
                         enableDrag: false,
-                        showDragHandle: false,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        builder: (context) => PopScope(
+                        backgroundColor: Colors.transparent,
+                        builder: (bottomSheetContext) => PopScope(
                           canPop: false,
                           child: SizedBox(
                             height: double.infinity,
                             child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CircularProgressIndicator(
-                                    color: Theme.of(context).colorScheme.primary,
+                              child: Card(
+                                margin: const EdgeInsets.all(32),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(32.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircularProgressIndicator(
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        'Memproses sertifikat, mohon tunggu...',
+                                        style: Theme.of(context).textTheme.bodyMedium,
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Memproses sertifikat, mohon tunggu...',
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
@@ -334,8 +339,9 @@ class _ConfirmationContent extends StatelessWidget {
 
                       await _executeGenerateSertificate(context);
 
+                      // Dismiss bottom sheet after processing
                       if (context.mounted) {
-                        controller.close();
+                        Navigator.of(context).pop();
                       }
                     },
               style: FilledButton.styleFrom(padding: const EdgeInsets.all(20)),
