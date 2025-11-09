@@ -42,8 +42,9 @@ dependencies:
   csv: ^6.0.0
   process_run: ^1.2.4
   path_provider: ^2.1.5
-  printing: ^5.13.4
   pdf: ^3.11.1
+  url_launcher: ^6.3.1
+  share_plus: ^10.1.2
 
 dev_dependencies:
   flutter_test:

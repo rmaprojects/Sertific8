@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:sertific8/states/results_provider.dart';
-import 'package:printing/printing.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ResultsScreen extends StatelessWidget {
   const ResultsScreen({super.key});
 
-  Future<void> _printSelectedImages(BuildContext context, ResultsProvider provider) async {
+  Future<void> _shareSelectedImages(BuildContext context, ResultsProvider provider) async {
     final selectedPaths = provider.selectedPaths;
 
     if (selectedPaths.isEmpty) {
@@ -20,7 +22,7 @@ class ResultsScreen extends StatelessWidget {
     }
 
     try {
-      // Build PDF in background
+      // Build PDF
       final pdf = pw.Document();
 
       for (final path in selectedPaths) {
@@ -39,11 +41,84 @@ class ResultsScreen extends StatelessWidget {
 
       final pdfBytes = await pdf.save();
 
-      // Use sharePdf which opens system share dialog (non-blocking)
-      await Printing.sharePdf(
-        bytes: pdfBytes,
-        filename: 'Sertifikat_${DateTime.now().millisecondsSinceEpoch}.pdf',
+      // Save PDF to temporary directory
+      final tempDir = await getTemporaryDirectory();
+      final fileName = 'Sertifikat_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final pdfFile = File('${tempDir.path}/$fileName');
+      await pdfFile.writeAsBytes(pdfBytes);
+
+      // Share PDF using native share dialog
+      final result = await Share.shareXFiles(
+        [XFile(pdfFile.path)],
+        subject: 'Sertifikat',
       );
+
+      if (result.status == ShareResultStatus.success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('PDF berhasil dibagikan')),
+        );
+      }
+
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _printSelectedImages(BuildContext context, ResultsProvider provider) async {
+    final selectedPaths = provider.selectedPaths;
+
+    if (selectedPaths.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tidak ada gambar yang dipilih')),
+      );
+      return;
+    }
+
+    try {
+      // Build PDF
+      final pdf = pw.Document();
+
+      for (final path in selectedPaths) {
+        final imageFile = File(path);
+        final imageBytes = await imageFile.readAsBytes();
+        final image = pw.MemoryImage(imageBytes);
+        pdf.addPage(
+          pw.Page(
+            orientation: pw.PageOrientation.landscape,
+            build: (context) => pw.Center(
+              child: pw.Image(image, fit: pw.BoxFit.contain),
+            ),
+          ),
+        );
+      }
+
+      // Save PDF to temporary directory
+      final tempDir = await getTemporaryDirectory();
+      final fileName = 'Sertifikat_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final pdfFile = File('${tempDir.path}/$fileName');
+      await pdfFile.writeAsBytes(await pdf.save());
+
+      // Open PDF in browser
+      final uri = Uri.file(pdfFile.path);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tidak dapat membuka PDF di browser'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
 
     } catch (e) {
       if (context.mounted) {
@@ -188,11 +263,18 @@ class ResultsScreen extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      // Print Button
+                      // Print Button (opens PDF in browser)
                       FilledButton.icon(
                         onPressed: () => _printSelectedImages(context, provider),
                         icon: const Icon(Icons.print),
                         label: const Text('Print'),
+                      ),
+                      const SizedBox(width: 8),
+                      // Share Button
+                      FilledButton.icon(
+                        onPressed: () => _shareSelectedImages(context, provider),
+                        icon: const Icon(Icons.share),
+                        label: const Text('Share'),
                       ),
                       const SizedBox(width: 8),
                       // Delete Button
